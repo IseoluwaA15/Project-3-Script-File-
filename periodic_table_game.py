@@ -1,4 +1,5 @@
 import random
+import signal
 
 # List of all elements from the periodic table
 ELEMENTS = [
@@ -122,31 +123,31 @@ ELEMENTS = [
     {"name": "Oganesson", "symbol": "Og", "atomic_number": 118},
 ]
 
+def timeout_handler(signum, frame):
+    raise TimeoutError
+
 def play_game():
     print("Welcome to the Periodic Table Guessing Game!")
-    print("You will be given either the name or the symbol of an element. Answer accordingly.")
+    print("You will be given the name of an element. Guess its symbol. You have 30 seconds for each question.")
     score = 0
     rounds = 20
     for i in range(rounds):
         element = random.choice(ELEMENTS)
-        # Odd 10s: ask for symbol from name; Even 10s: ask for name from symbol
-        if (i // 10) % 2 == 0:
-            # Ask for symbol from name
-            answer = input(f"Round {i+1}: What is the symbol for {element['name']}? ").strip()
+        print(f"Round {i+1}: What is the symbol for {element['name']}?")
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(30)
+        try:
+            answer = input("Your answer: ").strip()
+            signal.alarm(0)
             if answer.lower() == element['symbol'].lower():
-                print("Correct!\n")
-                score += 1
+                score += 2
+                print(f"Correct! You have {score} point{'s' if score != 2 else ''}.\n")
             else:
                 print(f"Incorrect. The correct symbol is {element['symbol']}\n")
-        else:
-            # Ask for name from symbol
-            answer = input(f"Round {i+1}: What is the name of the element with symbol {element['symbol']}? ").strip()
-            if answer.lower() == element['name'].lower():
-                print("Correct!\n")
-                score += 1
-            else:
-                print(f"Incorrect. The correct name is {element['name']}\n")
-    print(f"Game over! Your score: {score}/{rounds}")
+        except TimeoutError:
+            print("Time's up! No points awarded.\n")
+            signal.alarm(0)
+    print(f"Game over! Your score: {score}/{rounds * 2}")
 
 if __name__ == "__main__":
     play_game()
