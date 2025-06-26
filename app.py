@@ -1,7 +1,16 @@
+from flask import Flask, render_template, request, redirect, url_for, session
 import random
-import signal
+import shutil
+import os
 
-# List of all elements from the periodic table
+app = Flask(__name__)
+app.secret_key = 'periodic_secret_key'
+
+# Copy the image to the static folder if not already present
+STATIC_IMAGE_PATH = os.path.join(app.root_path, 'static', 'PeriodicTableAtomic.png')
+if not os.path.exists(STATIC_IMAGE_PATH):
+    shutil.copy('PeriodicTableAtomic.png', STATIC_IMAGE_PATH)
+
 ELEMENTS = [
     {"name": "Hydrogen", "symbol": "H", "atomic_number": 1},
     {"name": "Helium", "symbol": "He", "atomic_number": 2},
@@ -123,38 +132,40 @@ ELEMENTS = [
     {"name": "Oganesson", "symbol": "Og", "atomic_number": 118},
 ]
 
-def timeout_handler(signum, frame):
-    raise TimeoutError
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if 'score' not in session:
+        session['score'] = 0
+        session['round'] = 1
+        session['remaining'] = list(range(len(ELEMENTS)))
+    if request.method == 'POST':
+        answer = request.form.get('answer', '').strip().lower()
+        idx = session['current_idx']
+        correct = ELEMENTS[idx]['symbol'].lower()
+        if answer == correct:
+            session['score'] += 2
+            feedback = f"Correct! You have {session['score']} points."
+        else:
+            feedback = f"Incorrect. The correct symbol is {ELEMENTS[idx]['symbol']}."
+        session['round'] += 1
+        session['remaining'].remove(idx)
+        if not session['remaining'] or session['round'] > 20:
+            final_score = session['score']
+            session.clear()
+            return render_template('gameover.html', score=final_score)
+        idx = random.choice(session['remaining'])
+        session['current_idx'] = idx
+        return render_template('index.html', element=ELEMENTS[idx], round=session['round'], score=session['score'], feedback=feedback)
+    if 'remaining' not in session or not session['remaining']:
+        session['remaining'] = list(range(len(ELEMENTS)))
+    idx = random.choice(session['remaining'])
+    session['current_idx'] = idx
+    return render_template('index.html', element=ELEMENTS[idx], round=session['round'], score=session['score'])
 
-def play_game():
-    print("Welcome to the Periodic Table Guessing Game!")
-    print("You will be given the name of an element. Guess its symbol. You have 1 minute for each question.")
-    score = 0
-    rounds = min(20, len(ELEMENTS))  # Ensure we don't exceed the number of elements
-    elements_to_ask = ELEMENTS.copy()
-    random.shuffle(elements_to_ask)
-    for i in range(rounds):
-        element = elements_to_ask[i]
-        print(f"Round {i+1}: What is the symbol for {element['name']}?")
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(60)
-        try:
-            answer = input("Your answer: ").strip()
-            signal.alarm(0)
-            if answer.lower() == element['symbol'].lower():
-                score += 2
-                print(f"Correct! You have {score} point{'s' if score != 2 else ''}.\n")
-            else:
-                print(f"Incorrect. The correct symbol is {element['symbol']}\n")
-        except TimeoutError:
-            print("Time's up! No points awarded.\n")
-            signal.alarm(0)
-    print(f"Game over! Your score: {score}/{rounds * 2}")
-    restart = input("Would you like to play again? (y/n): ").strip().lower()
-    if restart == 'y':
-        play_game()
-    else:
-        print("Thanks for playing!")
+@app.route('/restart')
+def restart():
+    session.clear()
+    return redirect(url_for('index'))
 
-if __name__ == "__main__":
-    play_game()
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Periodic Table Game</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f0f0; }
+        .container { max-width: 400px; margin: 40px auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #ccc; }
+        h1 { text-align: center; }
+        .score { margin-bottom: 1em; }
+        .feedback { color: #007700; margin-bottom: 1em; }
+        .incorrect { color: #bb2222; }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="main-content">
+        <div class="container">
+            <h1>Periodic Table Game</h1>
+            <div class="score">Round {{ round }}/20 | Score: {{ score }}</div>
+            {% if feedback %}
+                <div class="feedback {% if 'Incorrect' in feedback %}incorrect{% endif %}">{{ feedback }}</div>
+            {% endif %}
+            <form method="post">
+                <label for="answer">What is the symbol for <b>{{ element.name }}</b>?</label><br><br>
+                <input type="text" id="answer" name="answer" autocomplete="off" required autofocus>
+                <button type="submit">Submit</button>
+            </form>
+            <br>
+            <form action="/restart">
+                <button type="submit">Restart Game</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
