@@ -128,14 +128,14 @@ def timeout_handler(signum, frame):
 
 def play_game():
     print("Welcome to the Periodic Table Guessing Game!")
-    print("You will be given the name of an element. Guess its symbol. You have 30 seconds for each question.")
+    print("You will be given the name of an element. Guess its symbol. You have 1 minute for each question.")
     score = 0
     rounds = 20
     for i in range(rounds):
         element = random.choice(ELEMENTS)
         print(f"Round {i+1}: What is the symbol for {element['name']}?")
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(30)
+        signal.alarm(60)
         try:
             answer = input("Your answer: ").strip()
             signal.alarm(0)
@@ -148,6 +148,11 @@ def play_game():
             print("Time's up! No points awarded.\n")
             signal.alarm(0)
     print(f"Game over! Your score: {score}/{rounds * 2}")
+    restart = input("Would you like to play again? (y/n): ").strip().lower()
+    if restart == 'y':
+        play_game()
+    else:
+        print("Thanks for playing!")
 
 if __name__ == "__main__":
     play_game()
