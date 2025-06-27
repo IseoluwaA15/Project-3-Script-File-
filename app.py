@@ -134,10 +134,14 @@ ELEMENTS = [
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if 'score' not in session:
+    if request.method == 'GET':
         session['score'] = 0
         session['round'] = 1
         session['remaining'] = list(range(len(ELEMENTS)))
+        idx = random.choice(session['remaining'])
+        session['current_idx'] = idx
+        # Always provide feedback (empty on GET)
+        return render_template('index.html', element=ELEMENTS[idx], round=session['round'], score=session['score'], feedback='')
     if request.method == 'POST':
         answer = request.form.get('answer', '').strip().lower()
         idx = session['current_idx']
@@ -155,12 +159,15 @@ def index():
             return render_template('gameover.html', score=final_score)
         idx = random.choice(session['remaining'])
         session['current_idx'] = idx
-        return render_template('index.html', element=ELEMENTS[idx], round=session['round'], score=session['score'], feedback=feedback)
-    if 'remaining' not in session or not session['remaining']:
-        session['remaining'] = list(range(len(ELEMENTS)))
-    idx = random.choice(session['remaining'])
-    session['current_idx'] = idx
-    return render_template('index.html', element=ELEMENTS[idx], round=session['round'], score=session['score'])
+        # Redirect to GET after POST to avoid double submission
+        return redirect(url_for('show_question', feedback=feedback))
+    return redirect(url_for('index'))
+
+@app.route('/question')
+def show_question():
+    feedback = request.args.get('feedback', '')
+    idx = session.get('current_idx', random.choice(list(range(len(ELEMENTS)))))
+    return render_template('index.html', element=ELEMENTS[idx], round=session.get('round', 1), score=session.get('score', 0), feedback=feedback)
 
 @app.route('/restart')
 def restart():

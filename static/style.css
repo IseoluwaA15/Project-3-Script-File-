@@ -1,6 +1,6 @@
 /* Moved to static for Flask to serve */
 body {
-    background-image: url('/PeriodicTableAtomic.png');
+    background-image: url('/static/PeriodicTableAtomic.png');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -11,7 +11,7 @@ body {
 }
 
 .overlay {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.5); /* Reduced opacity for clearer background */
     min-height: 100vh;
     width: 100vw;
     position: absolute;
@@ -24,4 +24,29 @@ body {
     position: relative;
     z-index: 2;
     padding: 2rem;
+}
+
+.element-gif {
+    position: absolute;
+    z-index: 0;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.gif-hydrogen {
+    top: 10%;
+    left: 5%;
+    width: 80px;
+}
+
+.gif-helium {
+    bottom: 15%;
+    right: 8%;
+    width: 70px;
+}
+
+.gif-gold {
+    top: 60%;
+    left: 80%;
+    width: 90px;
 }

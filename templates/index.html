@@ -5,7 +5,7 @@
     <title>Periodic Table Game</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f0f0; }
+        body { font-family: Arial, sans-serif; }
         .container { max-width: 400px; margin: 40px auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #ccc; }
         h1 { text-align: center; }
         .score { margin-bottom: 1em; }
@@ -14,11 +14,13 @@
     </style>
 </head>
 <body>
+    <!-- GIFs removed -->
     <div class="overlay"></div>
     <div class="main-content">
         <div class="container">
             <h1>Periodic Table Game</h1>
             <div class="score">Round {{ round }}/20 | Score: {{ score }}</div>
+            <div id="timer" style="font-weight:bold; color:#333; margin-bottom:1em; text-align:center;"></div>
             {% if feedback %}
                 <div class="feedback {% if 'Incorrect' in feedback %}incorrect{% endif %}">{{ feedback }}</div>
             {% endif %}
@@ -33,5 +35,19 @@
             </form>
         </div>
     </div>
+    <script>
+        let timeLeft = 60;
+        const timerDiv = document.getElementById('timer');
+        function updateTimer() {
+            timerDiv.textContent = `Time left: ${timeLeft} second${timeLeft !== 1 ? 's' : ''}`;
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+            } else {
+                timerDiv.textContent = "Time's up! Submit your answer.";
+            }
+        }
+        updateTimer();
+    </script>
 </body>
 </html>

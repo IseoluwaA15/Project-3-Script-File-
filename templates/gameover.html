@@ -5,9 +5,10 @@
     <title>Game Over</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f0f0; }
+        body { font-family: Arial, sans-serif; }
         .container { max-width: 400px; margin: 40px auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #ccc; }
         h1 { text-align: center; }
+        .score { margin-bottom: 1em; }
     </style>
 </head>
 <body>
@@ -15,9 +16,9 @@
     <div class="main-content">
         <div class="container">
             <h1>Game Over!</h1>
-            <p>Your final score: <b>{{ score }}/40</b></p>
+            <div class="score">Your final score: <b>{{ score }}/{{ max_score }}</b></div>
             <form action="/restart">
-                <button type="submit">Play Again</button>
+                <button type="submit">Restart Game</button>
             </form>
         </div>
     </div>
